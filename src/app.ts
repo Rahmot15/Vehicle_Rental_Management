@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { type Application, type Request, type Response } from 'express';
 import config from './config';
+import authRouter from './modules/auth/auth.routes';
 
 const app: Application = express();
 
@@ -10,7 +11,7 @@ app.use(cors());
 app.use('/uploads', express.static(config.uploadPath));
 
 // application routes
-// app.use('/api/v1', router);
+app.use('/auth', authRouter);
 
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({

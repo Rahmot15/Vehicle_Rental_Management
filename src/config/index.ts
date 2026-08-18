@@ -1,5 +1,6 @@
 import path from 'path';
 import dotenv from 'dotenv';
+import type { SignOptions } from 'jsonwebtoken';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -43,6 +44,7 @@ const config = {
     max: dbPoolMax,
   },
   jwtSecret: getRequiredEnv('JWT_SECRET'),
+  jwtExpiresIn: (process.env.JWT_EXPIRES_IN ?? '1d') as SignOptions['expiresIn'],
   uploadPath: path.resolve(process.cwd(), process.env.UPLOAD_PATH ?? 'src/uploads'),
 } as const;
 
