@@ -23,7 +23,7 @@ const config = {
   port,
   databaseUrl: getRequiredEnv('DATABASE_URL'),
   jwtSecret: getRequiredEnv('JWT_SECRET'),
-  uploadPath: path.resolve(process.cwd(), process.env.UPLOAD_PATH ?? 'uploads'),
+  uploadPath: path.resolve(process.cwd(), process.env.UPLOAD_PATH ?? 'src/uploads'),
 } as const;
 
 export default config;

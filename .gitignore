@@ -2,5 +2,5 @@ node_modules
 dist
 .env
 .pnpm-store
-uploads/*
-!uploads/.gitkeep
+src/uploads/*
+!src/uploads/.gitkeep
