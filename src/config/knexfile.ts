@@ -8,11 +8,11 @@ const knexConfig: Record<string, Knex.Config> = {
     connection: config.databaseUrl,
     pool: config.dbPool,
     migrations: {
-      directory: path.resolve(process.cwd(), 'src/database/migrations'),
+      directory: path.resolve(__dirname, '../database/migrations'),
       extension: 'ts',
     },
     seeds: {
-      directory: path.resolve(process.cwd(), 'src/database/seeds'),
+      directory: path.resolve(__dirname, '../database/seeds'),
       extension: 'ts',
     },
   },

@@ -10,9 +10,9 @@
     "db:check": "ts-node src/scripts/check-database.ts",
     "db:migrate": "knex --knexfile src/config/knexfile.ts migrate:latest",
     "db:migrate:rollback": "knex --knexfile src/config/knexfile.ts migrate:rollback",
-    "db:migrate:make": "knex --knexfile src/config/knexfile.ts migrate:make",
+    "db:migrate:make": "knex --knexfile src/config/knexfile.ts migrate:make -x ts",
     "db:seed": "knex --knexfile src/config/knexfile.ts seed:run",
-    "db:seed:make": "knex --knexfile src/config/knexfile.ts seed:make",
+    "db:seed:make": "knex --knexfile src/config/knexfile.ts seed:make -x ts",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write ."
