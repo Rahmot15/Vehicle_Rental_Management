@@ -7,6 +7,12 @@
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
+    "db:check": "ts-node src/scripts/check-database.ts",
+    "db:migrate": "knex --knexfile src/config/knexfile.ts migrate:latest",
+    "db:migrate:rollback": "knex --knexfile src/config/knexfile.ts migrate:rollback",
+    "db:migrate:make": "knex --knexfile src/config/knexfile.ts migrate:make",
+    "db:seed": "knex --knexfile src/config/knexfile.ts seed:run",
+    "db:seed:make": "knex --knexfile src/config/knexfile.ts seed:make",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write ."
@@ -42,6 +48,7 @@
     "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.6",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0"
