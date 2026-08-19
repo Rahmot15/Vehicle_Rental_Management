@@ -11,6 +11,14 @@ export interface VehicleRentalReport {
   revenue: number;
 }
 
+export interface VehicleRentalReportRow {
+  vehicle_id: number;
+  vehicle_name: string;
+  total_bookings: string | number;
+  days_rented: string | number;
+  revenue: string | number;
+}
+
 export interface RentalReportResponse {
   month: string;
   vehicles: VehicleRentalReport[];
