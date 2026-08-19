@@ -9,6 +9,7 @@ import {
   createRentalSchema,
   rentalIdParamsSchema,
   rentalListQuerySchema,
+  updateRentalSchema,
 } from '../../validations/rental.validation';
 import { RentalController } from './rental.controller';
 import { RentalRepository } from './rental.repository';
@@ -26,5 +27,12 @@ rentalRouter.use(authenticate);
 rentalRouter.get('/', validateQuery(rentalListQuerySchema), rentalController.getAll);
 rentalRouter.post('/', validateBody(createRentalSchema), rentalController.create);
 rentalRouter.get('/:id', validateParams(rentalIdParamsSchema), rentalController.getById);
+rentalRouter.put(
+  '/:id',
+  validateParams(rentalIdParamsSchema),
+  validateBody(updateRentalSchema),
+  rentalController.update,
+);
+rentalRouter.delete('/:id', validateParams(rentalIdParamsSchema), rentalController.remove);
 
 export default rentalRouter;

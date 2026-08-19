@@ -7,6 +7,8 @@ import type {
   RentalListQuery,
   RentalListResponse,
   RentalRow,
+  UpdateRentalInput,
+  UpdateRentalResult,
 } from './rental.types';
 
 export class RentalService {
@@ -60,6 +62,80 @@ export class RentalService {
     });
 
     return { type: 'success', rental: this.toRental(rental) };
+  }
+
+  async updateRental(id: number, input: UpdateRentalInput): Promise<UpdateRentalResult> {
+    const existingRental = await this.rentalRepository.findById(id);
+
+    if (!existingRental) {
+      return { type: 'not_found' };
+    }
+
+    const vehicleId = input.vehicle_id ?? existingRental.vehicle_id;
+    const startDate = input.start_date ?? existingRental.start_date;
+    const endDate = input.end_date ?? existingRental.end_date;
+    const status = input.status ?? existingRental.status;
+
+    if (endDate < startDate) {
+      return { type: 'invalid_date_range' };
+    }
+
+    const vehicleOrDateChanged =
+      vehicleId !== existingRental.vehicle_id ||
+      startDate !== existingRental.start_date ||
+      endDate !== existingRental.end_date;
+    const isActiveRental = status === 'booked' || status === 'ongoing';
+    const wasActiveRental =
+      existingRental.status === 'booked' || existingRental.status === 'ongoing';
+    const requiresVehicleLookup =
+      vehicleOrDateChanged ||
+      input.vehicle_id !== undefined ||
+      (isActiveRental && !wasActiveRental);
+
+    let vehicleDailyRate: number | undefined;
+
+    if (requiresVehicleLookup) {
+      const vehicle = await this.vehicleRepository.findById(vehicleId);
+
+      if (!vehicle) {
+        return { type: 'vehicle_not_found' };
+      }
+
+      vehicleDailyRate = Number(vehicle.daily_rate);
+    }
+
+    if (isActiveRental) {
+      const hasDateConflict = await this.rentalRepository.hasActiveRentalOverlap(
+        vehicleId,
+        startDate,
+        endDate,
+        id,
+      );
+
+      if (hasDateConflict) {
+        return { type: 'date_conflict' };
+      }
+    }
+
+    const rental = await this.rentalRepository.update(id, {
+      ...input,
+      ...(vehicleOrDateChanged
+        ? {
+            total_amount: (vehicleDailyRate ?? 0) * this.getInclusiveDayCount(startDate, endDate),
+          }
+        : {}),
+    });
+
+    if (!rental) {
+      return { type: 'not_found' };
+    }
+
+    return { type: 'success', rental: this.toRental(rental) };
+  }
+
+  async deleteRental(id: number): Promise<Rental | undefined> {
+    const rental = await this.rentalRepository.delete(id);
+    return rental ? this.toRental(rental) : undefined;
   }
 
   private getInclusiveDayCount(startDate: string, endDate: string): number {

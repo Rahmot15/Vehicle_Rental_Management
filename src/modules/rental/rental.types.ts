@@ -53,3 +53,19 @@ export interface CreateRentalRecord extends CreateRentalInput {
 
 export type CreateRentalResult =
   { type: 'success'; rental: Rental } | { type: 'vehicle_not_found' } | { type: 'date_conflict' };
+
+export interface UpdateRentalInput {
+  vehicle_id?: number;
+  customer_name?: string;
+  customer_phone?: string;
+  start_date?: string;
+  end_date?: string;
+  status?: RentalStatus;
+}
+
+export type UpdateRentalResult =
+  | { type: 'success'; rental: Rental }
+  | { type: 'not_found' }
+  | { type: 'invalid_date_range' }
+  | { type: 'vehicle_not_found' }
+  | { type: 'date_conflict' };

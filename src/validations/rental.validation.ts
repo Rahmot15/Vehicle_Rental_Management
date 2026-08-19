@@ -40,3 +40,12 @@ export const createRentalSchema = Joi.object({
   .messages({
     'any.invalid': 'end_date must be on or after start_date.',
   });
+
+export const updateRentalSchema = Joi.object({
+  vehicle_id: Joi.number().integer().positive(),
+  customer_name: Joi.string().trim().max(255),
+  customer_phone: Joi.string().trim().max(50),
+  start_date: Joi.date().iso().raw(),
+  end_date: Joi.date().iso().raw(),
+  status: Joi.string().valid('booked', 'ongoing', 'completed', 'cancelled'),
+}).min(1);

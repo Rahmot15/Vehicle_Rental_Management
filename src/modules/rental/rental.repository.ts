@@ -1,6 +1,11 @@
 import type { Knex } from 'knex';
 import database from '../../config/database/knex';
-import type { CreateRentalRecord, RentalListQuery, RentalRow } from './rental.types';
+import type {
+  CreateRentalRecord,
+  RentalListQuery,
+  RentalRow,
+  UpdateRentalInput,
+} from './rental.types';
 
 export class RentalRepository {
   constructor(private readonly db: Knex = database) {}
@@ -13,19 +18,42 @@ export class RentalRepository {
     vehicleId: number,
     startDate: string,
     endDate: string,
+    excludedRentalId?: number,
   ): Promise<boolean> {
-    const conflictingRental = await this.db<RentalRow>('rentals')
+    const rentalQuery = this.db<RentalRow>('rentals')
       .where('vehicle_id', vehicleId)
       .whereIn('status', ['booked', 'ongoing'])
       .where('start_date', '<=', endDate)
-      .where('end_date', '>=', startDate)
-      .first('id');
+      .where('end_date', '>=', startDate);
+
+    if (excludedRentalId) {
+      rentalQuery.whereNot('id', excludedRentalId);
+    }
+
+    const conflictingRental = await rentalQuery.first('id');
 
     return Boolean(conflictingRental);
   }
 
   async create(input: CreateRentalRecord): Promise<RentalRow> {
     const [rental] = await this.db<RentalRow>('rentals').insert(input).returning('*');
+    return rental;
+  }
+
+  async update(
+    id: number,
+    input: UpdateRentalInput & { total_amount?: number },
+  ): Promise<RentalRow | undefined> {
+    const [rental] = await this.db<RentalRow>('rentals')
+      .where({ id })
+      .update({ ...input, updated_at: this.db.fn.now() })
+      .returning('*');
+
+    return rental;
+  }
+
+  async delete(id: number): Promise<RentalRow | undefined> {
+    const [rental] = await this.db<RentalRow>('rentals').where({ id }).delete().returning('*');
     return rental;
   }
 
