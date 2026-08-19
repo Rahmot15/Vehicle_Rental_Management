@@ -1,5 +1,6 @@
 import type { Knex } from 'knex';
 import database from '../../config/database/knex';
+import { activeRentalStatuses } from './rental.types';
 import type {
   CreateRentalRecord,
   RentalListQuery,
@@ -14,15 +15,15 @@ export class RentalRepository {
     return this.db<RentalRow>('rentals').where({ id }).first();
   }
 
-  async hasActiveRentalOverlap(
+  async findActiveRentalOverlap(
     vehicleId: number,
     startDate: string,
     endDate: string,
     excludedRentalId?: number,
-  ): Promise<boolean> {
+  ): Promise<RentalRow | undefined> {
     const rentalQuery = this.db<RentalRow>('rentals')
       .where('vehicle_id', vehicleId)
-      .whereIn('status', ['booked', 'ongoing'])
+      .whereIn('status', activeRentalStatuses)
       .where('start_date', '<=', endDate)
       .where('end_date', '>=', startDate);
 
@@ -30,9 +31,7 @@ export class RentalRepository {
       rentalQuery.whereNot('id', excludedRentalId);
     }
 
-    const conflictingRental = await rentalQuery.first('id');
-
-    return Boolean(conflictingRental);
+    return rentalQuery.first();
   }
 
   async create(input: CreateRentalRecord): Promise<RentalRow> {

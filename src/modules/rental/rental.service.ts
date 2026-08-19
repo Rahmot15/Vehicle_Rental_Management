@@ -43,13 +43,13 @@ export class RentalService {
       return { type: 'vehicle_not_found' };
     }
 
-    const hasDateConflict = await this.rentalRepository.hasActiveRentalOverlap(
+    const conflictingRental = await this.rentalRepository.findActiveRentalOverlap(
       input.vehicle_id,
       input.start_date,
       input.end_date,
     );
 
-    if (hasDateConflict) {
+    if (conflictingRental) {
       return { type: 'date_conflict' };
     }
 
@@ -105,14 +105,14 @@ export class RentalService {
     }
 
     if (isActiveRental) {
-      const hasDateConflict = await this.rentalRepository.hasActiveRentalOverlap(
+      const conflictingRental = await this.rentalRepository.findActiveRentalOverlap(
         vehicleId,
         startDate,
         endDate,
         id,
       );
 
-      if (hasDateConflict) {
+      if (conflictingRental) {
         return { type: 'date_conflict' };
       }
     }

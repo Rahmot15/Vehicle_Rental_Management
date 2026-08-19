@@ -1,6 +1,8 @@
 export const rentalStatuses = ['booked', 'ongoing', 'completed', 'cancelled'] as const;
+export const activeRentalStatuses = ['booked', 'ongoing'] as const;
 
 export type RentalStatus = (typeof rentalStatuses)[number];
+export type ActiveRentalStatus = (typeof activeRentalStatuses)[number];
 
 export interface RentalRow {
   id: number;
