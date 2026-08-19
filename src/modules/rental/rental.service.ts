@@ -37,31 +37,41 @@ export class RentalService {
   }
 
   async createRental(input: CreateRentalInput): Promise<CreateRentalResult> {
-    const vehicle = await this.vehicleRepository.findById(input.vehicle_id);
+    return this.rentalRepository.runInTransaction(async (transaction) => {
+      const vehicle = await this.vehicleRepository.findActiveByIdForUpdate(
+        input.vehicle_id,
+        transaction,
+      );
 
-    if (!vehicle) {
-      return { type: 'vehicle_not_found' };
-    }
+      if (!vehicle) {
+        return { type: 'vehicle_not_found' };
+      }
 
-    const conflictingRental = await this.rentalRepository.findActiveRentalOverlap(
-      input.vehicle_id,
-      input.start_date,
-      input.end_date,
-    );
+      const conflictingRental = await this.rentalRepository.findActiveRentalOverlap(
+        input.vehicle_id,
+        input.start_date,
+        input.end_date,
+        undefined,
+        transaction,
+      );
 
-    if (conflictingRental) {
-      return { type: 'date_conflict' };
-    }
+      if (conflictingRental) {
+        return { type: 'date_conflict' };
+      }
 
-    const totalAmount =
-      Number(vehicle.daily_rate) * this.getInclusiveDayCount(input.start_date, input.end_date);
-    const rental = await this.rentalRepository.create({
-      ...input,
-      total_amount: totalAmount,
-      status: 'booked',
+      const totalAmount =
+        Number(vehicle.daily_rate) * this.getInclusiveDayCount(input.start_date, input.end_date);
+      const rental = await this.rentalRepository.createInTransaction(
+        {
+          ...input,
+          total_amount: totalAmount,
+          status: 'booked',
+        },
+        transaction,
+      );
+
+      return { type: 'success', rental: this.toRental(rental) };
     });
-
-    return { type: 'success', rental: this.toRental(rental) };
   }
 
   async updateRental(id: number, input: UpdateRentalInput): Promise<UpdateRentalResult> {

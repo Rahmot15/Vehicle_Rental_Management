@@ -20,8 +20,10 @@ export class RentalRepository {
     startDate: string,
     endDate: string,
     excludedRentalId?: number,
+    transaction?: Knex.Transaction,
   ): Promise<RentalRow | undefined> {
-    const rentalQuery = this.db<RentalRow>('rentals')
+    const databaseConnection = transaction ?? this.db;
+    const rentalQuery = databaseConnection<RentalRow>('rentals')
       .where('vehicle_id', vehicleId)
       .whereIn('status', activeRentalStatuses)
       .where('start_date', '<=', endDate)
@@ -37,6 +39,18 @@ export class RentalRepository {
   async create(input: CreateRentalRecord): Promise<RentalRow> {
     const [rental] = await this.db<RentalRow>('rentals').insert(input).returning('*');
     return rental;
+  }
+
+  async createInTransaction(
+    input: CreateRentalRecord,
+    transaction: Knex.Transaction,
+  ): Promise<RentalRow> {
+    const [rental] = await transaction<RentalRow>('rentals').insert(input).returning('*');
+    return rental;
+  }
+
+  async runInTransaction<T>(callback: (transaction: Knex.Transaction) => Promise<T>): Promise<T> {
+    return this.db.transaction(callback);
   }
 
   async update(

@@ -19,6 +19,17 @@ export class VehicleRepository {
     return this.db<VehicleRow>('vehicles').where({ id }).whereNull('deleted_at').first();
   }
 
+  async findActiveByIdForUpdate(
+    id: number,
+    transaction: Knex.Transaction,
+  ): Promise<VehicleRow | undefined> {
+    return transaction<VehicleRow>('vehicles')
+      .where({ id })
+      .whereNull('deleted_at')
+      .forUpdate()
+      .first();
+  }
+
   async findByPlateNumber(plateNumber: string): Promise<VehicleRow | undefined> {
     return this.db<VehicleRow>('vehicles').where({ plate_number: plateNumber }).first();
   }
