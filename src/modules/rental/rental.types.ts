@@ -37,3 +37,19 @@ export interface RentalListResponse {
     total_pages: number;
   };
 }
+
+export interface CreateRentalInput {
+  vehicle_id: number;
+  customer_name: string;
+  customer_phone: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface CreateRentalRecord extends CreateRentalInput {
+  total_amount: number;
+  status: 'booked';
+}
+
+export type CreateRentalResult =
+  { type: 'success'; rental: Rental } | { type: 'vehicle_not_found' } | { type: 'date_conflict' };

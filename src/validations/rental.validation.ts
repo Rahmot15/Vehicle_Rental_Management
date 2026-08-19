@@ -22,3 +22,21 @@ export const rentalListQuerySchema = Joi.object({
   .messages({
     'any.invalid': 'end_date must be on or after start_date.',
   });
+
+export const createRentalSchema = Joi.object({
+  vehicle_id: Joi.number().integer().positive().required(),
+  customer_name: Joi.string().trim().max(255).required(),
+  customer_phone: Joi.string().trim().max(50).required(),
+  start_date: Joi.date().iso().raw().required(),
+  end_date: Joi.date().iso().raw().required(),
+})
+  .custom((value, helpers) => {
+    if (value.start_date > value.end_date) {
+      return helpers.error('any.invalid');
+    }
+
+    return value;
+  }, 'rental date range validation')
+  .messages({
+    'any.invalid': 'end_date must be on or after start_date.',
+  });

@@ -1,12 +1,32 @@
 import type { Knex } from 'knex';
 import database from '../../config/database/knex';
-import type { RentalListQuery, RentalRow } from './rental.types';
+import type { CreateRentalRecord, RentalListQuery, RentalRow } from './rental.types';
 
 export class RentalRepository {
   constructor(private readonly db: Knex = database) {}
 
   async findById(id: number): Promise<RentalRow | undefined> {
     return this.db<RentalRow>('rentals').where({ id }).first();
+  }
+
+  async hasActiveRentalOverlap(
+    vehicleId: number,
+    startDate: string,
+    endDate: string,
+  ): Promise<boolean> {
+    const conflictingRental = await this.db<RentalRow>('rentals')
+      .where('vehicle_id', vehicleId)
+      .whereIn('status', ['booked', 'ongoing'])
+      .where('start_date', '<=', endDate)
+      .where('end_date', '>=', startDate)
+      .first('id');
+
+    return Boolean(conflictingRental);
+  }
+
+  async create(input: CreateRentalRecord): Promise<RentalRow> {
+    const [rental] = await this.db<RentalRow>('rentals').insert(input).returning('*');
+    return rental;
   }
 
   async findAll(query: RentalListQuery): Promise<{ rentals: RentalRow[]; total: number }> {
