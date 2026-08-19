@@ -40,7 +40,7 @@ export class ReportService {
       vehicle_name: row.vehicle_name,
       total_bookings: Number(row.total_bookings),
       days_rented: Number(row.days_rented),
-      revenue: Number(row.revenue),
+      revenue: Math.round(Number(row.revenue) * 100) / 100,
     };
   }
 }
