@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { type Application, type Request, type Response } from 'express';
 import config from './config';
+import { globalErrorHandler, notFoundHandler } from './middlewares/error.middleware';
 import authRouter from './modules/auth/auth.routes';
 import rentalRouter from './modules/rental/rental.routes';
 import reportRouter from './modules/report/report.routes';
@@ -25,5 +26,8 @@ app.get('/', (_req: Request, res: Response) => {
     message: 'Vehicle Rental Management API is running.',
   });
 });
+
+app.use(notFoundHandler);
+app.use(globalErrorHandler);
 
 export default app;
