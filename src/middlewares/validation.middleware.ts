@@ -2,13 +2,13 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { unlink } from 'fs/promises';
 import path from 'path';
 import type { ObjectSchema } from 'joi';
+import { AppError } from '../errors/app-error';
 import config from '../config';
-import type { ApiResponse } from '../types/api.types';
 
 type RequestProperty = 'body' | 'params' | 'query';
 
 function validateRequestProperty(property: RequestProperty, schema: ObjectSchema): RequestHandler {
-  return (req: Request, res: Response<ApiResponse<never>>, next: NextFunction): void => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const { error, value } = schema.validate(req[property], {
       abortEarly: false,
       stripUnknown: true,
@@ -20,10 +20,7 @@ function validateRequestProperty(property: RequestProperty, schema: ObjectSchema
         : Promise.resolve();
 
       void removeInvalidUpload.then(() => {
-        res.status(400).json({
-          success: false,
-          message: error.details.map((detail) => detail.message).join(', '),
-        });
+        next(new AppError(400, error.details.map((detail) => detail.message).join(', ')));
       });
       return;
     }

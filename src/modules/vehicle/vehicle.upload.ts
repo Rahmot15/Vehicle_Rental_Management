@@ -5,7 +5,7 @@ import path from 'path';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import multer from 'multer';
 import config from '../../config';
-import type { ApiResponse } from '../../types/api.types';
+import { AppError } from '../../errors/app-error';
 
 const allowedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -34,26 +34,26 @@ const upload = multer({
 
 export const uploadVehiclePhoto: RequestHandler = (
   req: Request,
-  res: Response<ApiResponse<never>>,
+  res: Response,
   next: NextFunction,
 ): void => {
   upload.single('photo')(req, res, (error: unknown) => {
     if (error instanceof multer.MulterError) {
-      res.status(400).json({
-        success: false,
-        message:
+      next(
+        new AppError(
+          400,
           error.code === 'LIMIT_FILE_SIZE'
             ? 'Vehicle photo must not exceed 5 MB.'
             : 'Invalid vehicle photo upload.',
-      });
+        ),
+      );
       return;
     }
 
     if (error) {
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : 'Vehicle photo upload failed.',
-      });
+      next(
+        new AppError(400, error instanceof Error ? error.message : 'Vehicle photo upload failed.'),
+      );
       return;
     }
 
