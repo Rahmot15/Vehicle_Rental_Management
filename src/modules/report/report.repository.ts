@@ -14,8 +14,9 @@ export class ReportRepository {
       .join('vehicles as v', 'v.id', 'r.vehicle_id')
       .whereNot('r.status', 'cancelled')
       .where('r.start_date', '<=', monthEnd)
-      .where('r.end_date', '>=', monthStart)
-      .whereNull('v.deleted_at');
+      // A soft-deleted vehicle is hidden from vehicle APIs, but its rental
+      // history must remain visible in monthly reports.
+      .where('r.end_date', '>=', monthStart);
 
     if (query.vehicle_id) {
       reportQuery.where('r.vehicle_id', query.vehicle_id);
