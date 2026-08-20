@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import type {} from '../types/express';
 import jwt from 'jsonwebtoken';
 import config from '../config';
 import type { StaffJwtPayload } from '../modules/auth/auth.types';
